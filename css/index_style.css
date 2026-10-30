@@ -1,3 +1,4 @@
+/*General*/
 * {
     margin: 0;
     padding: 0;
@@ -8,29 +9,18 @@ body {
     font-family: arial, sans-serif;
 }
 
-/*Search bar*/
-.search {
-    flex-grow: 1;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.search input[type="text"] {
-    padding: 6px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    font-size: 17px;
-    border-radius: 4px;
-}
-
-.search button {
+button {
     padding: 6px 10px;
     background: white;
     color: green;
     border: solid;
     cursor: pointer;
     border-radius: 4px;
+}
+
+button:hover {
+    background: darkgreen;
+    color: white;
 }
 
 .icon {
@@ -40,9 +30,46 @@ body {
     vertical-align: middle;
 }
 
-.search button:hover {
-    background: darkgreen;
-    color: white;
+/*General END*/
+
+/*top-bar*/
+.top-bar {
+    display: flex; /*puts all items in the div on one line*/
+    align-items: center; /*centers them vertically*/
+    gap: 8px;
+    padding: 12px 16px;
+}
+
+.top-bar h1 {
+    margin-right: auto; /*pushes everything after it to the far right*/
+}
+
+/*top-bar END*/
+
+/*Search bar*/
+.search {
+    padding: 10px 16px;
+}
+
+.search form {
+    display: flex;
+    gap: 10px;
+}
+
+.search input[type="text"] {
+    flex: 1; /*input fills the remaining width*/
+    padding: 6px;
+    border: 1px solid #ccc;
+    font-size: 17px;
+    border-radius: 4px;
 }
 
 /*Search bar END*/
+
+/*template section*/
+.templates-section h2,
+.add-template-button {
+    padding: 10px 16px;
+}
+
+/*template section END*/
