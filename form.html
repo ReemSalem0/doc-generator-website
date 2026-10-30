@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/form_style.css" />
+    <title>Form</title>
+  </head>
+  <body>
+    <h1>Logo + Name</h1>
+
+    <div class="wrapper">
+      <div class="formDiv">
+        <h2>Document Name</h2>
+
+        <form class="docForm">
+          <label for="testText">Test text input</label>
+          <input type="text" name="testText" id="testText" /><br />
+
+          <label for="testNumber">Test number input</label>
+          <input type="number" name="testNumber" id="testNumber" /> <br />
+
+          <label for="testDate">Text date input</label>
+          <input type="date" name="testDate" id="testDate" /><br />
+        </form>
+      </div>
+
+      <div class="btnOptions">
+        <div class="dropdownBtn">
+          <button class="saveBtn">Save</button>
+
+          <div id="saveOptionsDropDown" class="dropdownContent">
+            <a href="#">Save as .docx</a>
+            <a href="#">Save as .pdf</a>
+          </div>
+        </div>
+
+        <button class="cancelBtn">Cancel</button>
+        <button class="previewBtn">Preview</button>
+      </div>
+    </div>
+
+    <script src="./js/dropdownButtonController.js"></script>
+  </body>
+</html>
