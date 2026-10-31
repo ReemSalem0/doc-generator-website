@@ -11,36 +11,56 @@
 <body>
     <header class="top-bar">
         <h1>Logo + Name</h1>
-        <button type="button">Edit</button>
-        <button type="button">New Template</button>
+        <div class="top-actions" hidden>
+            <button type="button">Edit</button>
+            <button type="button">New Template</button>
+        </div>
     </header>
-    <div class="search">
-        <form action="#">
-            <input type="search" placeholder="Search" name="search">
-            <button type="submit" aria-label="Search">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
-                    aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                    <path
-                        d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
-                </svg>
-            </button>
-        </form>
-    </div>
-    <main class="templates-section">
-        <h2>Templates</h2>
-        <div class="templates-list">
+    <main>
+        <!-- New user-->
+        <section id="emptyState" hidden>
+            <button type="button" class="big-add-btn">Add your first template</button>
+        </section>
 
-        </div>
-        <div class="add-template-button">
-            <button type="button" aria-label="Add template">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
-                    aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
-                    <path
-                        d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z" />
-                </svg>
-            </button>
-        </div>
+        <!--Returning user (there are templates already saved)-->
+        <section id="templatesView" hidden>
+            <div class="search">
+                <form action="#">
+                    <input type="search" placeholder="Search" name="search">
+                    <button type="submit" aria-label="Search">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                            <path
+                                d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <div class="templates-section">
+                <h2>Templates</h2>
+                <ul class="templates-list"></ul>
+
+                <template id="templateItem">
+                    <li class="template-card">
+                        <a class="template-link" href="#">
+                            <div class="template-thumbnail" aria-hidden="true"></div>
+                            <span class="template-name"></span>
+                        </a>
+                    </li>
+                </template>
+                <div class="add-template-button">
+                    <button type="button" aria-label="Add template">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                            <path
+                                d="M352 128C352 110.3 337.7 96 320 96C302.3 96 288 110.3 288 128L288 288L128 288C110.3 288 96 302.3 96 320C96 337.7 110.3 352 128 352L288 352L288 512C288 529.7 302.3 544 320 544C337.7 544 352 529.7 352 512L352 352L512 352C529.7 352 544 337.7 544 320C544 302.3 529.7 288 512 288L352 288L352 128z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
     </main>
+    <script type="module" src="./js/homepage.js"></script>
 </body>
 
 </html>

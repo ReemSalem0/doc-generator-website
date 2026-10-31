@@ -1,0 +1,12 @@
+node_modules
+dist
+
+# logs
+npm-debug.log*
+
+# system files
+.DS_Store
+Thumbs.db
+
+# secrets (if you ever add any)
+.env
