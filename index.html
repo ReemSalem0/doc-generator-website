@@ -13,13 +13,13 @@
         <h1>Logo + Name</h1>
         <div class="top-actions" hidden>
             <button type="button">Edit</button>
-            <button type="button">New Template</button>
+            <button type="button" class="add-template-trigger">New Template</button>
         </div>
     </header>
     <main>
         <!-- New user-->
         <section id="emptyState" hidden>
-            <button type="button" class="big-add-btn">Add your first template</button>
+            <button type="button" class="big-add-btn add-template-trigger">Add your first template</button>
         </section>
 
         <!--Returning user (there are templates already saved)-->
@@ -48,8 +48,8 @@
                         </a>
                     </li>
                 </template>
-                <div class="add-template-button">
-                    <button type="button" aria-label="Add template">
+                <div class="add-template-btn">
+                    <button type="button" class="add-template-trigger" aria-label="Add template">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                             aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                             <path
@@ -59,6 +59,8 @@
                 </div>
             </div>
         </section>
+        <input type="file" id="templateFileInput" hidden
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
     </main>
     <script type="module" src="./js/homepage.js"></script>
 </body>
