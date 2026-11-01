@@ -1,5 +1,3 @@
-'use strict';
-
 const dropdownMenu = document.getElementById("saveOptionsDropDown");
 const saveBtn = document.querySelector(".saveBtn");
 

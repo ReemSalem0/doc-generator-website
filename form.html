@@ -30,16 +30,22 @@
           <button class="saveBtn">Save</button>
 
           <div id="saveOptionsDropDown" class="dropdownContent">
-            <a href="#">Save as .docx</a>
-            <a href="#">Save as .pdf</a>
+            <button type="button" data-format="docx">Save as .docx</button>
+            <button type="button" data-format="pdf">Save as .pdf</button>
           </div>
         </div>
 
-        <button class="cancelBtn">Cancel</button>
-        <button class="previewBtn">Preview</button>
+        <button type="button" class="cancelBtn">Cancel</button>
+        <button type="button" class="previewBtn">Preview</button>
       </div>
     </div>
 
+     <dialog id="previewDialog">
+      <button type="button" class="closePreviewBtn">&times;</button>
+      <div id="preview"></div>
+     </dialog>
+
     <script  type="module" src="./js/dropdownButtonController.js"></script>
+    <script type="module" src="./js/formController.js"></script>
   </body>
 </html>
