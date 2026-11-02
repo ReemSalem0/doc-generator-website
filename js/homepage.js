@@ -1,3 +1,5 @@
+import { saveTemplate, getAllTemplates} from "./db.js";
+
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
 const topActions = document.querySelector(".top-actions");
@@ -21,17 +23,21 @@ fileInput.addEventListener("change", async () => {
         return;
     }
 
-    console.log("Selected:", file.name, file.size, "bytes");
+    try {
+        await saveTemplate(file);
+        await showHomepage(); //redraws the page so the new template appears
+    } catch (error) {
+        console.error(error);
+        alert("Couldn't save the template. Please try again.");
+    }
 
     fileInput.value = ""; //so picking the same file again triggers "change"
 });
 
-//Temporary until the DB storage is built
+//Reads saved templates, newest first
 async function getSavedTemplates() {
-    return [
-        //{ id: 1, name: "Inspection report.docx" },
-        //{ id: 2, name: "Maintenance check.docx" },
-    ];
+    const templates = await getAllTemplates();
+    return templates.reverse();
 }
 
 function renderTemplateList(templates) {
@@ -58,6 +64,10 @@ async function showHomepage() {
     if (hasTemplates) {
         renderTemplateList(templates);
     }
+}
+
+if (navigator.storage?.persist) {
+    navigator.storage.persist();
 }
 
 showHomepage();
