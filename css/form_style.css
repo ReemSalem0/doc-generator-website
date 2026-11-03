@@ -19,9 +19,18 @@
 /* #endregion */
 
 /* #region Form */
+
 input {
   margin-top: 9%;
 }
+
+.field{
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
 /* #endregion */
 
 /* #region Buttons */

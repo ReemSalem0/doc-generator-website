@@ -1,44 +1,62 @@
-import PizzZip from "pizzip";
-import Docxtemplater from "docxtemplater";
 import { renderAsync } from "docx-preview";
-import {formatDate} from "./fieldUtils.js";
+import {getTemplate} from "./db.js";
+import { getTags, createDocx } from "./docxService.js";
+import { tagsToFields, renderFields } from "./formBuilder.js";
+
+// The current template loaded, gets set once the init() function finishes running
+let currentTemplate = null;
+
+const docTitle = document.getElementById("docTitle");
 
 /**
- * Fills the template with the values provided from the form
- * @param {HTMLFormElement} form - The form filled with the inputs from the user
- * @returns {Promise<Blob>} The filled .docx file
+ * Loads the current template from the URL's ?id and reads its tags
+ * @returns {Promise<void>}
  */
-async function createDocx(form) {
-    const response = await fetch("/templates/TestTemplate.docx");
+async function init(){
+    const id = Number(new URLSearchParams(window.location.search).get("id"));
 
-    if(!response.ok)
-        throw new Error(`Template not found: ${response.status}`);
+    if(!Number.isInteger(id) || id <= 0){
+        console.error("Missing or invalid ID");
+        return;
+    }
 
-    const zip = new PizzZip (await response.arrayBuffer());
-    const doc = new Docxtemplater(zip, {paragraphLoop: true, linebreaks: true});
+    const template = await getTemplate(id);
 
-    const data = Object.fromEntries(new FormData(form));
-    
-    for(const input of form.querySelectorAll('input[type="date"]'))
-        data[input.name] = formatDate(data[input.name]);
-    
-    doc.render(data);
+    if(!template){
+        console.error(`No templates found with ID: ${id}`);
+        return;
+    }
 
-    return doc.getZip().generate({
-        type: "blob",
-        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    }); 
+    currentTemplate = template;
+
+    const displayName = template.name.replace(/\.docx$/i, "");
+    docTitle.textContent = displayName;
+    document.title = displayName;
+
+    try{
+        const tags = await getTags(template.file);
+        console.log("Tags: " + tags);
+
+        const fields = tagsToFields(tags);
+        console.log("Fields: " + fields);
+        
+        renderFields(form, fields);
+
+    } catch (err){
+        console.error("could not read template");
+        console.error(err.properties?.errors);
+    }
 }
 
 // Preview button functionality
 const form = document.querySelector(".docForm");
 const previewContainer = document.getElementById("preview");
 const previewDialog = document.getElementById("previewDialog");
-const previewBtn = document.querySelector(".previewBtn");
 
-previewBtn.addEventListener("click", async () =>{
+// Opens a preview modal for how the document will look with all the fields filled with the data from the form
+document.querySelector(".previewBtn").addEventListener("click", async () =>{
     try{
-        const blob = await createDocx(form);
+        const blob = await createDocx(form, currentTemplate.file);
         previewContainer.replaceChildren();
         await renderAsync(blob, previewContainer);
         previewDialog.showModal();
@@ -54,7 +72,12 @@ document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
 });
 
 // Close button functionality
+
+// Resets the form and returns to the home page
 document.querySelector(".cancelBtn").addEventListener("click", () =>{
     form.reset();
     window.location.href = import.meta.env.BASE_URL;
-})
+});
+
+// Setup once the page loads
+init();

@@ -11,18 +11,18 @@
 
     <div class="wrapper">
       <div class="formDiv">
-        <h2>Document Name</h2>
+        <h2 id="docTitle">Document Name</h2>
 
-        <form class="docForm">
-          <label for="testText">Test text input</label>
-          <input type="text" name="testText" id="testText" /><br />
+        <form class="docForm"></form>
 
-          <label for="testNumber">Test number input</label>
-          <input type="number" name="testNumber" id="testNumber" /> <br />
+        <template id="fieldTemplate">
+          <div class="field">
+            <label></label>
+            <input />
+          </div>
+        </template>
 
-          <label for="testDate">Text date input</label>
-          <input type="date" name="testDate" id="testDate" /><br />
-        </form>
+
       </div>
 
       <div class="btnOptions">
