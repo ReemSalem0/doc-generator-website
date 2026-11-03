@@ -110,8 +110,8 @@ button:hover {
 }
 
 .template-link {
-    flex: 1; /*takes all the space execpt the button*/
-    min-width: 0; /*let's long names shrink and show "..."*/
+    flex: 1; /*takes all the space except the button*/
+    min-width: 0; /*lets long names shrink and show "..."*/
     display: flex;
     align-items: center;
     gap: 12px;
@@ -144,5 +144,52 @@ button:hover {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/*Edit mode*/
+.edit-only {
+    display: none;
+}
+
+#templatesView.editing .edit-only {
+    display: flex;
+}
+
+#templatesView.editing .normal-only {
+    display: none;
+}
+
+#templatesView.editing .select-template {
+    display: block;
+    width: 22px;
+    height: 22px;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+.edit-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 10px;
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+/*Edit mode END*/
+
+/*Drag and Drop*/
+.drag-handle {
+    padding: 10px 14px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.template-card.dragging {
+    opacity: 0.6;
+    background: #f0f7f0;
+}
+/*Drag and Drop END*/
 
 /*template section END*/

@@ -48,3 +48,36 @@ export async function deleteTemplate(id) {
     const db = await dbPromise;
     return promisify(getStore(db, "readwrite").delete(id));
 }
+
+//Saves the list order: each template gets its position as "order"
+export async function saveTemplateOrder(templates) {
+    const db = await dbPromise;
+    const transaction = db.transaction(STORE, "readwrite");
+    const store = transaction.objectStore(STORE);
+
+    templates.forEach((template, index) => {
+        store.put({ ...template, order: index });
+    });
+
+    return transactionDone(transaction);
+}
+
+//Deletes several templates at once
+export async function deleteTemplates(ids) {
+    const db = await dbPromise;
+    const transaction = db.transaction(STORE, "readwrite");
+    const store = transaction.objectStore(STORE);
+
+    ids.forEach((id) => store.delete(id));
+
+    return transactionDone(transaction);
+}
+
+//Resolves when every request in the transaction has finished
+function transactionDone(transaction) {
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+    });
+}
