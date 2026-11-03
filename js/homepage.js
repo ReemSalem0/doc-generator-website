@@ -1,4 +1,4 @@
-import { saveTemplate, getAllTemplates} from "./db.js";
+import { saveTemplate, getAllTemplates, deleteTemplate } from "./db.js";
 
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
@@ -34,6 +34,22 @@ fileInput.addEventListener("change", async () => {
     fileInput.value = ""; //so picking the same file again triggers "change"
 });
 
+//Handles every delete button in the list (event delegation)
+templatesList.addEventListener("click", async (event) => {
+    const button = event.target.closest(".remove-template-btn");
+    if (!button) return; //the click wasn't on a delete button
+
+    if (!confirm("Delete this template?")) return;
+
+    try {
+        await deleteTemplate(Number(button.dataset.id)); //data-id is text the db id is a number
+        await showHomepage();
+    } catch (error) {
+        console.error(error);
+        alert("Couldn't delete the template.");
+    }
+});
+
 //Reads saved templates, newest first
 async function getSavedTemplates() {
     const templates = await getAllTemplates();
@@ -48,6 +64,8 @@ function renderTemplateList(templates) {
 
         card.querySelector(".template-name").textContent = template.name;
         card.querySelector(".template-link").href = `/form.html?id=${template.id}`;
+        card.querySelector(".remove-template-btn").dataset.id = template.id;
+
 
         templatesList.append(card);
     }

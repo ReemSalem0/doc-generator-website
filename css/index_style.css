@@ -103,14 +103,31 @@ button:hover {
     padding: 0 16px;
 }
 
+.template-card {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
 .template-link {
+    flex: 1; /*takes all the space execpt the button*/
+    min-width: 0; /*let's long names shrink and show "..."*/
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px;
-    border-bottom: 1px solid #eee;
     color: inherit;
     text-decoration: none;
+}
+
+.remove-template-btn {
+    border: none;
+    color: #c0392b;
+}
+
+.remove-template-btn:hover {
+    background: #c0392b;
+    color: white;
 }
 
 .template-thumbnail {
