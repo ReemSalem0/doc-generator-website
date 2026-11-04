@@ -1,4 +1,4 @@
-import { saveTemplate, getAllTemplates, saveTemplateOrder, deleteTemplates } from "./db.js";
+import { saveTemplate, getAllTemplates, saveTemplateOrder, getTemplateOrder, deleteTemplates } from "./db.js";
 
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
@@ -181,17 +181,23 @@ async function onDragEnd() {
     currentTemplates = newOrderIds.map((id) => currentTemplates.find((template) => template.id === id));
 
     try {
-        await saveTemplateOrder(currentTemplates);
+        await saveTemplateOrder(newOrderIds);
+        alert("Saved: " + newOrderIds.join(", ")); //for testing, delete later 
     } catch (error) {
         console.error(error);
-        alert("Couldn't save the new order: " + error.message);
+        alert("Couldn't save the new order");
     }
 }
 
 //Sorted by saved order; new templates (no order yet) go on top, newest first
 async function getSavedTemplates() {
-    const templates = await getAllTemplates();
-    const sortKey = (template) => template.order ?? -template.createdAt;
+    const [templates, order] = await Promise.all([getAllTemplates(), getTemplateOrder()]);
+
+    const sortKey = (template) => {
+        const position = order.indexOf(template.id);
+        return position === -1 ? -template.createdAt : position;
+    };
+
     return templates.sort((a, b) => sortKey(a) - sortKey(b));
 }
 

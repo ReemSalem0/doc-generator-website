@@ -1,6 +1,7 @@
 const DB_NAME = "doc-generator";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "templates";
+const SETTINGS = "settings";
 
 //Opens (or creates) the database once; everything else waits on this 
 const dbPromise = new Promise((resolve, reject) => {
@@ -8,7 +9,13 @@ const dbPromise = new Promise((resolve, reject) => {
 
     //Runs only when the database is created or its version goes up
     request.onupgradeneeded = () => {
-        request.result.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+            db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains(SETTINGS)) {
+            db.createObjectStore(SETTINGS);
+        }
     };
 
     request.onsuccess = () => resolve(request.result);
@@ -24,42 +31,38 @@ function promisify(request) {
 }
 
 //Every read or write happens inside a transaction ("readonly" or "readwrite")
-function getStore(db, mode) {
-    return db.transaction(STORE, mode).objectStore(STORE);
+function getStore(db, storeName, mode) {
+    return db.transaction(storeName, mode).objectStore(storeName);
+}
+
+//Resolves when every request in the transaction has finished
+function transactionDone(transaction) {
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+    });
 }
 
 // Saves an uploaded file and returns its new id
 export async function saveTemplate(file) {
     const db = await dbPromise;
-    return promisify(getStore(db, "readwrite").add({ name: file.name, file: file, createdAt: Date.now(), }));
+    return promisify(getStore(db, STORE, "readwrite").add({ name: file.name, file: file, createdAt: Date.now(), }));
 }
 
 export async function getAllTemplates() {
     const db = await dbPromise;
-    return promisify(getStore(db, "readonly").getAll());
+    return promisify(getStore(db, STORE, "readonly").getAll());
 }
 
 export async function getTemplate(id) {
     const db = await dbPromise;
-    return promisify(getStore(db, "readonly").get(id));
+    return promisify(getStore(db, STORE, "readonly").get(id));
 }
 
 export async function deleteTemplate(id) {
     const db = await dbPromise;
-    return promisify(getStore(db, "readwrite").delete(id));
-}
-
-//Saves the list order: each template gets its position as "order"
-export async function saveTemplateOrder(templates) {
-    const db = await dbPromise;
-    const transaction = db.transaction(STORE, "readwrite");
-    const store = transaction.objectStore(STORE);
-
-    templates.forEach((template, index) => {
-        store.put({ ...template, order: index });
-    });
-
-    return transactionDone(transaction);
+    return promisify(getStore(db, STORE, "readwrite").delete(id));
 }
 
 //Deletes several templates at once
@@ -73,11 +76,15 @@ export async function deleteTemplates(ids) {
     return transactionDone(transaction);
 }
 
-//Resolves when every request in the transaction has finished
-function transactionDone(transaction) {
-    return new Promise((resolve, reject) => {
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
-    });
+//Saves the list order as an array of ids
+export async function saveTemplateOrder(ids) {
+    const db = await dbPromise;
+    return promisify(getStore(db, SETTINGS, "readwrite").put(ids, "templateOrder"));
+}
+
+//Returns the saved order, or an empty array if there isn't one yet
+export async function getTemplateOrder() {
+    const db = await dbPromise;
+    const order = await promisify(getStore(db, SETTINGS, "readonly").get("templateOrder"));
+    return order ?? [];
 }
