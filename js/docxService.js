@@ -13,7 +13,7 @@ export async function getTags(file){
     const zip = new PizzZip(await file.arrayBuffer());
     const iModule = new InspectModule();
 
-    new Docxtemplater(zip, {modules: [iModule], paragraphLoop: true, linebreaks: true});
+    new Docxtemplater(zip, {modules: [iModule], paragraphLoop: true, linebreaks: true, parser});
     return iModule.getAllTags();
 }
 
@@ -25,7 +25,7 @@ export async function getTags(file){
  */
 export async function createDocx(form, file) {
     const zip = new PizzZip (await file.arrayBuffer());
-    const doc = new Docxtemplater(zip, {paragraphLoop: true, linebreaks: true});
+    const doc = new Docxtemplater(zip, {paragraphLoop: true, linebreaks: true, parser});
 
     const data = Object.fromEntries(new FormData(form));
     
@@ -38,4 +38,17 @@ export async function createDocx(form, file) {
         type: "blob",
         mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     }); 
+}
+
+/**
+ * 
+ * @param {string} tag - The full tag text
+ * @returns {{get: function(Object): *}} What docxtemplater uses to get the tag's value
+ */
+function parser(tag){
+    const name = tag.split(":")[0].trim();
+
+    return{
+        get: (scope) => (name === "." ? scope : scope[name])
+    }
 }

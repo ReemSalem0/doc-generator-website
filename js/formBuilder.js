@@ -1,3 +1,26 @@
+
+// Field types that a tempalte can use
+const FIELD_TYPES = ["text", "date", "number"];
+
+/**
+ * Splits a tag into its name and type
+ * if a tag doesn't include a type we default to a text field
+ * @param {string} tag - The full tag from the template
+ * @returns {{name: string, types, string}} The field's name and type
+ * @throws {Error} if the field type isn't found in the FIELD_TYPES array
+ */
+export function parseTag(tag){
+    let [name, type = "text"] = tag.split(":").map(part => part.trim());
+    type = type.toLowerCase();
+
+    if(!FIELD_TYPES.includes(type)){
+        throw new Error (`Unknown type "${type}" in the tag {${tag}}`);
+    }
+
+    return {name, type};
+}
+
+
 /**
  * Turns the tags from a template into a list of form fields
  * @param {Object} tags - the tags we get from the getTags() function
@@ -6,10 +29,12 @@
 export function tagsToFields(tags){
     const fields = [];
 
-    for(const [name, inner] of Object.entries(tags)){
+    for(const [tag, inner] of Object.entries(tags)){
         if(Object.keys(inner).length > 0) continue;
 
-        fields.push({name, label: name, type: "text", required: false});
+        const {name, type} = parseTag(tag);
+
+        fields.push({name, label: name, type, required: false});
     }
 
     return fields;
@@ -25,11 +50,11 @@ export function renderFields(form, fields){
     const fieldTemplate = document.getElementById("fieldTemplate");
     form.replaceChildren();
 
-    for(const field of fields){
+    for(const [index, field] of fields.entries()){
         const clone = fieldTemplate.content.cloneNode(true);
         const label = clone.querySelector("label");
         const input = clone.querySelector("input");
-        const id = `field-${field.name}`;
+        const id = `field-${index}`;
 
         label.textContent = field.label;
         label.htmlFor = id;

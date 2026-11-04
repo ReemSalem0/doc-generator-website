@@ -2,6 +2,7 @@ import { renderAsync } from "docx-preview";
 import {getTemplate} from "./db.js";
 import { getTags, createDocx } from "./docxService.js";
 import { tagsToFields, renderFields } from "./formBuilder.js";
+import { downloadFile, removeDocxExtention } from "./fileUtils.js";
 
 // The current template loaded, gets set once the init() function finishes running
 let currentTemplate = null;
@@ -29,7 +30,7 @@ async function init(){
 
     currentTemplate = template;
 
-    const displayName = template.name.replace(/\.docx$/i, "");
+    const displayName = removeDocxExtention(template.name);
     docTitle.textContent = displayName;
     document.title = displayName;
 
@@ -43,9 +44,19 @@ async function init(){
         renderFields(form, fields);
 
     } catch (err){
-        console.error("could not read template");
-        console.error(err.properties?.errors);
+        console.error("could not read template " + err.message);
+        if (err.properties?.errors) console.error(err.properties.errors);
     }
+}
+
+/**
+ * Fills the template with the form's values
+ * @returns {Promise<void>}
+ */
+async function renderPreview(){
+    const blob = await createDocx(form, currentTemplate.file);
+    previewContainer.replaceChildren();
+    await renderAsync(blob, previewContainer);
 }
 
 // Preview button functionality
@@ -56,13 +67,11 @@ const previewDialog = document.getElementById("previewDialog");
 // Opens a preview modal for how the document will look with all the fields filled with the data from the form
 document.querySelector(".previewBtn").addEventListener("click", async () =>{
     try{
-        const blob = await createDocx(form, currentTemplate.file);
-        previewContainer.replaceChildren();
-        await renderAsync(blob, previewContainer);
+        await renderPreview();
         previewDialog.showModal();
     } catch (err){
         console.error(err);
-        console.error(err.properties?.errors);
+        if (err.properties?.errors) console.error(err.properties.errors);
     }
 });
 
@@ -77,6 +86,34 @@ document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
 document.querySelector(".cancelBtn").addEventListener("click", () =>{
     form.reset();
     window.location.href = import.meta.env.BASE_URL;
+});
+
+// Download as .docx button functionality
+document.querySelector('[data-format="docx"]').addEventListener('click', async () =>{
+    if(!currentTemplate) return;
+
+    try{
+        const blob = await createDocx(form, currentTemplate.file);
+
+        downloadFile(blob, `${removeDocxExtention(currentTemplate.name)}.docx`);
+    } catch(err){
+        console.error("Could not save docx " + err.message );
+        if (err.properties?.errors) console.error(err.properties.errors);
+    }
+});
+
+// Download as .pdf button functionality
+document.querySelector('[data-format="pdf"]').addEventListener("click", async () =>{
+    if(!currentTemplate) return;
+
+    try{
+        await renderPreview();
+        window.print();
+    } catch(err){
+        console.error("Could not create PDF " + err.message);
+
+        if (err.properties?.errors) console.error(err.properties.errors);
+    }
 });
 
 // Setup once the page loads
