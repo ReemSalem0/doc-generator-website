@@ -82,12 +82,20 @@ button:hover {
 }
 
 .search input[type="search"] {
-    flex: 1;
-    /*input fills the remaining width*/
+    flex: 1; /*input fills the remaining width*/
     padding: 6px;
     border: 1px solid #ccc;
     font-size: 17px;
     border-radius: 4px;
+}
+
+.no-results {
+    padding: 10px 16px;
+    color: #777;
+}
+
+.search input[type="search"]:disabled {
+    background: #f2f2f2;
 }
 
 /*Search bar END*/
@@ -175,6 +183,10 @@ button:hover {
 button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.rename-template-btn {
+    border: none;
 }
 /*Edit mode END*/
 

@@ -88,3 +88,18 @@ export async function getTemplateOrder() {
     const order = await promisify(getStore(db, SETTINGS, "readonly").get("templateOrder"));
     return order ?? [];
 }
+
+//Returns custom names as { id: name }, or an empty object if none yet
+export async function getTemplateNames() {
+    const db = await dbPromise;
+    const names = await promisify(getStore(db, SETTINGS, "readonly").get("templateNames"));
+    return names ?? {};
+} 
+
+//Saves a custom name for one template
+export async function saveTemplateName(id, newName) {
+    const names = await getTemplateNames();
+    names[id] = newName;
+    const db = await dbPromise;
+    return promisify(getStore(db, SETTINGS, "readwrite").put(names, "templateNames"));
+}

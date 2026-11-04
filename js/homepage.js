@@ -1,4 +1,6 @@
 import { saveTemplate, getAllTemplates, saveTemplateOrder, getTemplateOrder, deleteTemplates } from "./db.js";
+import { filterTemplates, onSearchChange, resetSearch } from "./search.js";
+import { addDisplayNames, promptRename } from "./rename.js";
 
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
@@ -11,6 +13,8 @@ const editBtn = document.getElementById("editBtn");
 const editToolbar = document.querySelector(".edit-toolbar");
 const selectAllBtn = document.getElementById("selectAllBtn");
 const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+
+const noResults = document.querySelector(".no-results");
 
 let currentTemplates = []; // the list as currently shown
 let isEditing = false;
@@ -45,6 +49,15 @@ fileInput.addEventListener("change", async () => {
     fileInput.value = ""; //so picking the same file again triggers "change"
 });
 
+//Draws only the templates matching the search
+function applySearch() {
+    const visible = filterTemplates(currentTemplates);
+    renderTemplateList(visible);
+    noResults.hidden = visible.length > 0;
+}
+
+onSearchChange(applySearch);
+
 //Edit /Done button
 editBtn.addEventListener("click", () => setEditMode(!isEditing));
 
@@ -54,6 +67,8 @@ function setEditMode(on) {
     editToolbar.hidden = !on;
     editBtn.textContent = on ? "Done" : "Edit";
     selectedIds.clear();
+    resetSearch(on);
+    noResults.hidden = true;
     renderTemplateList(currentTemplates);
     updateToolbar();
 }
@@ -74,6 +89,15 @@ templatesList.addEventListener("click", async (event) => {
 
     // Edit mode: ignore the click that ends a drag
     if (event.target.closest(".drag-handle")) return;
+
+    //Edit mode: rename
+    if (event.target.closest(".rename-template-btn")) {
+        const template = currentTemplates.find((t) => t.id === id);
+        if (await promptRename(template)) {
+            renderTemplateList(currentTemplates);
+        }
+        return;
+    }
 
     // Tapping the card (not the checkbox itself) toggles its checkbox
     const checkbox = card.querySelector(".select-template");
@@ -182,7 +206,6 @@ async function onDragEnd() {
 
     try {
         await saveTemplateOrder(newOrderIds);
-        alert("Saved: " + newOrderIds.join(", ")); //for testing, delete later 
     } catch (error) {
         console.error(error);
         alert("Couldn't save the new order");
@@ -192,6 +215,7 @@ async function onDragEnd() {
 //Sorted by saved order; new templates (no order yet) go on top, newest first
 async function getSavedTemplates() {
     const [templates, order] = await Promise.all([getAllTemplates(), getTemplateOrder()]);
+    await addDisplayNames(templates);
 
     const sortKey = (template) => {
         const position = order.indexOf(template.id);
@@ -210,11 +234,11 @@ function renderTemplateList(templates) {
         const checkbox = card.querySelector(".select-template");
 
         card.querySelector(".template-card").dataset.id = template.id;
-        card.querySelector(".template-name").textContent = template.name;
+        card.querySelector(".template-name").textContent = template.displayName;
         card.querySelector(".template-link").href = `/form.html?id=${template.id}`;
 
         checkbox.checked = selectedIds.has(template.id);
-        checkbox.setAttribute("aria-label", `Select ${template.name}`);
+        checkbox.setAttribute("aria-label", `Select ${template.displayName}`);
 
         templatesList.append(card);
     }
@@ -229,7 +253,7 @@ async function showHomepage() {
     topActions.hidden = !hasTemplates;
 
     if (hasTemplates) {
-        renderTemplateList(currentTemplates);
+        applySearch();
     }
 }
 
