@@ -12,7 +12,7 @@
     <header class="top-bar">
         <h1>Logo + Name</h1>
         <div class="top-actions" hidden>
-            <button type="button">Edit</button>
+            <button type="button" id="editBtn">Edit</button>
             <button type="button" class="add-template-trigger">New Template</button>
         </div>
     </header>
@@ -38,16 +38,35 @@
             </div>
             <div class="templates-section">
                 <h2>Templates</h2>
+                <div class="edit-toolbar" hidden>
+                    <button type="button" id="selectAllBtn">Select all</button>
+                    <button type="button" id="deleteSelectedBtn">Delete</button>
+                </div>
                 <ul class="templates-list"></ul>
-
                 <template id="templateItem">
                     <li class="template-card">
+                        <input type="checkbox" class="select-template edit-only">
                         <a class="template-link" href="#">
                             <div class="template-thumbnail" aria-hidden="true"></div>
                             <span class="template-name"></span>
                         </a>
+                        <button type="button" class="remove-template-btn normal-only" aria-label="Delete template">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                                aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path
+                                    d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z" />
+                            </svg>
+                        </button>
+                        <span class="drag-handle edit-only" aria-hidden="true"><svg class="icon"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 640 640"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+                                <path
+                                    d="M96 160C96 142.3 110.3 128 128 128L512 128C529.7 128 544 142.3 544 160C544 177.7 529.7 192 512 192L128 192C110.3 192 96 177.7 96 160zM96 320C96 302.3 110.3 288 128 288L512 288C529.7 288 544 302.3 544 320C544 337.7 529.7 352 512 352L128 352C110.3 352 96 337.7 96 320zM544 480C544 497.7 529.7 512 512 512L128 512C110.3 512 96 497.7 96 480C96 462.3 110.3 448 128 448L512 448C529.7 448 544 462.3 544 480z" />
+                            </svg>
+                        </span>
                     </li>
                 </template>
+
                 <div class="add-template-btn">
                     <button type="button" class="add-template-trigger" aria-label="Add template">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
