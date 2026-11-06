@@ -145,6 +145,26 @@ button:hover {
     border-radius: 4px;
     background: #f7f7f7;
     flex-shrink: 0; /*don't squash it when the name is long*/
+    position: relative;
+    overflow: hidden; /*cuts off everything outside the box*/
+}
+
+/*A rendered first page, shrunk from the top-left corner*/
+.thumb-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content; /*keep the page's real width so it can be measured*/
+    transform-origin: top left;
+    background: white;
+}
+
+/*A built-in thumbnail image*/
+.thumb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
 }
 
 .template-name {

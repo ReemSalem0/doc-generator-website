@@ -1,6 +1,7 @@
 import { saveTemplate, getAllTemplates, saveTemplateOrder, getTemplateOrder, deleteTemplates } from "./db.js";
 import { filterTemplates, onSearchChange, resetSearch } from "./search.js";
 import { addDisplayNames, promptRename } from "./rename.js";
+import { showThumbnail, forgetThumbnails } from "./thumbnails.js";
 
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
@@ -152,6 +153,7 @@ async function deleteWithConfirm(ids) {
 
     try {
         await deleteTemplates(ids);
+        forgetThumbnails(ids);
         ids.forEach((id) => selectedIds.delete(id));
         await showHomepage();
         if (isEditing && currentTemplates.length === 0) setEditMode(false);
@@ -272,7 +274,9 @@ function renderTemplateList(templates) {
         checkbox.checked = selectedIds.has(template.id);
         checkbox.setAttribute("aria-label", `Select ${template.displayName}`);
 
+        const thumbnailBox = card.querySelector(".template-thumbnail");
         templatesList.append(card);
+        showThumbnail(thumbnailBox, template);
     }
 }
 
