@@ -12,6 +12,7 @@
     <div class="wrapper">
       <div class="formDiv">
         <h2 id="docTitle">Document Name</h2>
+        <div id="formError" role="alert" hidden></div>
 
         <form class="docForm"></form>
 
@@ -27,7 +28,7 @@
 
       <div class="btnOptions">
         <div class="dropdownBtn">
-          <button class="saveBtn">Save</button>
+          <button class="saveBtn" disabled>Save</button>
 
           <div id="saveOptionsDropDown" class="dropdownContent">
             <button type="button" data-format="docx">Save as .docx</button>
@@ -36,7 +37,7 @@
         </div>
 
         <button type="button" class="cancelBtn">Cancel</button>
-        <button type="button" class="previewBtn">Preview</button>
+        <button type="button" class="previewBtn" disabled>Preview</button>
       </div>
     </div>
 

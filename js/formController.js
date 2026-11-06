@@ -8,45 +8,98 @@ import { downloadFile, removeDocxExtention } from "./fileUtils.js";
 let currentTemplate = null;
 
 const docTitle = document.getElementById("docTitle");
+const formError = document.getElementById("formError");
+const saveBtn = document.querySelector(".saveBtn");
+const previewBtn = document.querySelector(".previewBtn");
 
 /**
  * Loads the current template from the URL's ?id and reads its tags
  * @returns {Promise<void>}
  */
 async function init(){
-    const id = Number(new URLSearchParams(window.location.search).get("id"));
+    try{
+        const id = Number(new URLSearchParams(window.location.search).get("id"));
 
     if(!Number.isInteger(id) || id <= 0){
-        console.error("Missing or invalid ID");
+        showError("No template selected");
         return;
     }
 
     const template = await getTemplate(id);
 
     if(!template){
-        console.error(`No templates found with ID: ${id}`);
+        showError(`Template not found`);
         return;
     }
 
-    currentTemplate = template;
+    
 
     const displayName = removeDocxExtention(template.name);
     docTitle.textContent = displayName;
     document.title = displayName;
 
-    try{
-        const tags = await getTags(template.file);
-        console.log("Tags: " + tags);
+    const fields = tagsToFields(await getTags(template.file)); // Getting the tags then turning them to fields right away
 
-        const fields = tagsToFields(tags);
-        console.log("Fields: " + fields);
-        
-        renderFields(form, fields);
-
-    } catch (err){
-        console.error("could not read template " + err.message);
-        if (err.properties?.errors) console.error(err.properties.errors);
+    if(fields.length === 0){
+        showError("This template has no fields to fill in");
+        return;
     }
+
+    renderFields(form, fields);
+    currentTemplate = template;
+    saveBtn.disabled = false;
+    previewBtn.disabled = false;
+    } catch (err){
+        console.error(err);
+        showError("This template has a problem and can't be used: " + getErrorDetails(err));
+        
+    }
+}
+
+/**
+ * Shows an error message above the form
+ * @param {string} message - The error message to let the user know what went wrong
+ * @param {string[]} [details] - Optional list of specifics
+ * @returns {void}
+ */
+function showError(message, details = []){
+    const text = document.createElement("p");
+
+    text.textContent = message;
+    formError.replaceChild(text);
+
+    if(details.length > 0){
+        const list = document.createElement("ul");
+
+        for(const detail of details){
+            const item = document.createElement("li");
+            item.textContent = detail;
+            list.append(item);
+        }
+
+        formError.append(list);
+    }
+
+    formError.hidden = false;
+}
+
+/**
+ * Hides the error message
+ * @returns {void}
+ */
+function clearError(){
+    formError.hidden = true;
+    formError.replaceChildren();
+}
+
+/**
+ * Gets readable messages from an error
+ * @param {Error} err - The caught error
+ * @returns {string[]} One explanation per error
+ */
+function getErrorDetails(){
+    const errors = err.properties?.errors ?? [err];
+    return errors.map(e => e.properties?.explanation ?? e.message);
 }
 
 /**
@@ -66,6 +119,8 @@ const previewDialog = document.getElementById("previewDialog");
 
 // Opens a preview modal for how the document will look with all the fields filled with the data from the form
 document.querySelector(".previewBtn").addEventListener("click", async () =>{
+    clearError();
+
     try{
         await renderPreview();
         previewDialog.showModal();
@@ -91,28 +146,29 @@ document.querySelector(".cancelBtn").addEventListener("click", () =>{
 // Download as .docx button functionality
 document.querySelector('[data-format="docx"]').addEventListener('click', async () =>{
     if(!currentTemplate) return;
+    clearError();
 
     try{
         const blob = await createDocx(form, currentTemplate.file);
 
         downloadFile(blob, `${removeDocxExtention(currentTemplate.name)}.docx`);
     } catch(err){
-        console.error("Could not save docx " + err.message );
-        if (err.properties?.errors) console.error(err.properties.errors);
+        console.error(err);
+        showError("The docx could not be created: " + getErrorDetails(err));
     }
 });
 
 // Download as .pdf button functionality
 document.querySelector('[data-format="pdf"]').addEventListener("click", async () =>{
     if(!currentTemplate) return;
+    clearError();
 
     try{
         await renderPreview();
         window.print();
     } catch(err){
-        console.error("Could not create PDF " + err.message);
-
-        if (err.properties?.errors) console.error(err.properties.errors);
+        console.error(err);
+        showError("The PDF could not be created: " + getErrorDetails(err));
     }
 });
 
