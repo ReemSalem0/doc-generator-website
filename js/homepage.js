@@ -20,6 +20,8 @@ let currentTemplates = []; // the list as currently shown
 let isEditing = false;
 const selectedIds = new Set(); // ids of ticked templates
 let draggedCard = null; //the card being dragged, if any
+let lastPointerY = 0; //where the finger is while dragging
+let autoScrollFrame = null; //the running auto scroll loop
 
 
 //Every "add template" button opens file picker
@@ -174,28 +176,58 @@ templatesList.addEventListener("pointerdown", (event) => {
     document.addEventListener("pointermove", onDragMove);
     document.addEventListener("pointerup", onDragEnd);
     document.addEventListener("pointercancel", onDragEnd);
+    lastPointerY = event.clientY;
+    autoScrollFrame = requestAnimationFrame(autoScroll);
 });
 
 function onDragMove(event) {
+    lastPointerY = event.clientY;
+    moveDraggedCard();
+}
+
+//Puts the dragged card where the finger is
+function moveDraggedCard() {
     const otherCards = [...templatesList.querySelectorAll(".template-card:not(.dragging)")];
 
-    // The first card whose middle is below the finger is where we insert before
+    //the first card whose middle is below the finger is where we insert before
     const nextCard = otherCards.find((card) => {
         const box = card.getBoundingClientRect();
-        return event.clientY < box.top + box.height / 2;
+        return lastPointerY < box.top + box.height / 2;
     });
 
     if (nextCard) {
         templatesList.insertBefore(draggedCard, nextCard);
     } else {
-        templatesList.append(draggedCard);   // below every card: move to the end
+        templatesList.append(draggedCard); // below every card: move to the end
     }
+}
+
+//Scrolls the page while the finger is near the top or bottom edge
+function autoScroll() {
+    const edge = 80; //distance from the edge (px) where scrolling starts
+    const maxSpeed = 12; //pixels per frame at the very edge
+    let speed = 0;
+
+    if (lastPointerY < edge) {
+        speed = -maxSpeed * (1 - lastPointerY / edge);
+    } else if (lastPointerY > window.innerHeight - edge) {
+        speed = maxSpeed * (1 - (window.innerHeight - lastPointerY) / edge);
+    }
+
+    if (speed !== 0) {
+        window.scrollBy(0, speed);
+        moveDraggedCard(); //the cards moved under the finger, so re-place dragged one
+    }
+
+    autoScrollFrame = requestAnimationFrame(autoScroll);
 }
 
 async function onDragEnd() {
     document.removeEventListener("pointermove", onDragMove);
     document.removeEventListener("pointerup", onDragEnd);
     document.removeEventListener("pointercancel", onDragEnd);
+
+    cancelAnimationFrame(autoScrollFrame);
 
     draggedCard.classList.remove("dragging");
     draggedCard = null;
