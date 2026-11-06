@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev":"vite",
-    "build":"vite build",
-    "preview":"vite preview"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,11 @@
   "homepage": "https://github.com/ReemSalem0/doc-generator-website#readme",
   "devDependencies": {
     "vite": "^8.3.5"
+  },
+  "dependencies": {
+    "docx-preview": "^0.4.1",
+    "docxtemplater": "^3.71.1",
+    "lodash": "^4.18.1",
+    "pizzip": "^3.3.0"
   }
 }
