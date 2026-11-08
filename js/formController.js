@@ -12,6 +12,15 @@ const formError = document.getElementById("formError");
 const saveBtn = document.querySelector(".saveBtn");
 const previewBtn = document.querySelector(".previewBtn");
 
+// Displaying a hint on how to save the document as a pdf based on the user's device (IOS or android)
+const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.paltform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/.test(navigator.userAgent);
+
+document.getElementById("pdfHint").textContent =
+        isIos ? "Then tap the share icon and choose \"Save to Files\"" :
+        isAndroid ? "Then pick \"Save as PDF\" as the printer"
+        : "Then choose \"Save as PDF\" as the destination";
+
 /**
  * Loads the current template from the URL's ?id and reads its tags
  * @returns {Promise<void>}
@@ -65,8 +74,8 @@ async function init(){
 function showError(message, details = []){
     const text = document.createElement("p");
 
-    text.textContent = message;
-    formError.replaceChild(text);
+    text.textContent = "ERROR: " + message;
+    formError.replaceChildren(text);
 
     if(details.length > 0){
         const list = document.createElement("ul");
@@ -97,7 +106,7 @@ function clearError(){
  * @param {Error} err - The caught error
  * @returns {string[]} One explanation per error
  */
-function getErrorDetails(){
+function getErrorDetails(err){
     const errors = err.properties?.errors ?? [err];
     return errors.map(e => e.properties?.explanation ?? e.message);
 }
@@ -121,6 +130,9 @@ const previewDialog = document.getElementById("previewDialog");
 document.querySelector(".previewBtn").addEventListener("click", async () =>{
     clearError();
 
+    if(!form.reportValidity())
+        return;
+
     try{
         await renderPreview();
         previewDialog.showModal();
@@ -139,6 +151,11 @@ document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
 
 // Resets the form and returns to the home page
 document.querySelector(".cancelBtn").addEventListener("click", () =>{
+    const hasValues = [...form.querySelectorAll("input")].some(input => input.value !== "");
+    
+    if(hasValues && !confirm("Discard this report? Everything you have filled will be reset"))
+        return;
+
     form.reset();
     window.location.href = import.meta.env.BASE_URL;
 });
@@ -146,6 +163,10 @@ document.querySelector(".cancelBtn").addEventListener("click", () =>{
 // Download as .docx button functionality
 document.querySelector('[data-format="docx"]').addEventListener('click', async () =>{
     if(!currentTemplate) return;
+
+    if(!form.reportValidity())
+        return;
+    
     clearError();
 
     try{
@@ -161,6 +182,10 @@ document.querySelector('[data-format="docx"]').addEventListener('click', async (
 // Download as .pdf button functionality
 document.querySelector('[data-format="pdf"]').addEventListener("click", async () =>{
     if(!currentTemplate) return;
+
+    if(!form.reportValidity())
+        return;
+
     clearError();
 
     try{

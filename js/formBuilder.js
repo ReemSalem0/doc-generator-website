@@ -34,7 +34,7 @@ export function tagsToFields(tags){
 
         const {name, type} = parseTag(tag);
 
-        fields.push({name, label: name, type, required: false});
+        fields.push({name, label: name, type, required: true});
     }
 
     return fields;
