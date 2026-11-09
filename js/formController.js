@@ -1,11 +1,14 @@
 import { renderAsync } from "docx-preview";
 import {getTemplate} from "./db.js";
 import { getTags, createDocx } from "./docxService.js";
-import { tagsToFields, renderFields } from "./formBuilder.js";
+import { tagsToFields, renderFields, collectData } from "./formBuilder.js";
 import { downloadFile, removeDocxExtention } from "./fileUtils.js";
 
 // The current template loaded, gets set once the init() function finishes running
 let currentTemplate = null;
+
+// The form's fields, set once init() builds the form
+let currentFields = [];
 
 const docTitle = document.getElementById("docTitle");
 const formError = document.getElementById("formError");
@@ -55,6 +58,7 @@ async function init(){
     }
 
     renderFields(form, fields);
+    currentFields = fields;
     currentTemplate = template;
     saveBtn.disabled = false;
     previewBtn.disabled = false;
@@ -116,7 +120,7 @@ function getErrorDetails(err){
  * @returns {Promise<void>}
  */
 async function renderPreview(){
-    const blob = await createDocx(form, currentTemplate.file);
+    const blob = await createDocx(collectData(form, currentFields), currentTemplate.file);
     previewContainer.replaceChildren();
     await renderAsync(blob, previewContainer);
 }
@@ -146,6 +150,16 @@ document.querySelector(".previewBtn").addEventListener("click", async () =>{
 document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
     previewDialog.close();
 });
+
+// Closing the modal when clicking outside of it
+previewDialog.addEventListener("click", (e) =>{
+    const box = previewDialog.getBoundingClientRect();
+
+    const clickedOutside = e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+
+    if(clickedOutside)
+        previewDialog.close();
+})
 
 // Close button functionality
 
