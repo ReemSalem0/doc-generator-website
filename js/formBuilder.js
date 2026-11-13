@@ -79,6 +79,9 @@ function createField(field){
     input.type = field.type;
     input.required = field.required;
 
+    label.dir = "auto";
+    input.dir = "auto";
+
     return wrapper;
 }
 

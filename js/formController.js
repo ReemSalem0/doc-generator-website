@@ -1,6 +1,6 @@
 import { renderAsync } from "docx-preview";
 import {getTemplate} from "./db.js";
-import { getTags, createDocx } from "./docxService.js";
+import { getTags, createDocx, getRtlTables } from "./docxService.js";
 import { tagsToFields, renderFields, collectData } from "./formBuilder.js";
 import { downloadFile, removeDocxExtention } from "./fileUtils.js";
 
@@ -123,6 +123,13 @@ async function renderPreview(){
     const blob = await createDocx(collectData(form, currentFields), currentTemplate.file);
     previewContainer.replaceChildren();
     await renderAsync(blob, previewContainer);
+
+    const rtlTables = await getRtlTables(blob);
+    const tables = previewContainer.querySelectorAll("article table");
+    rtlTables.forEach((isRtl, i) =>{
+        if(isRtl && tables[i])
+            tables[i].dir = "rtl";
+    });
 }
 
 // Preview button functionality
@@ -184,7 +191,7 @@ document.querySelector('[data-format="docx"]').addEventListener('click', async (
     clearError();
 
     try{
-        const blob = await createDocx(form, currentTemplate.file);
+        const blob = await createDocx(collectData(form, currentFields), currentTemplate.file);
 
         downloadFile(blob, `${removeDocxExtention(currentTemplate.name)}.docx`);
     } catch(err){

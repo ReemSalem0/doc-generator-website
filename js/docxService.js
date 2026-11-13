@@ -46,3 +46,24 @@ function parser(tag){
         get: (scope) => (name === "." ? scope : scope[name])
     }
 }
+
+/**
+ * Finds which tables in a docx that are right to left
+ * @param {Blob} file - A .docx file
+ * @returns {Promise<boolean[]>} One entry per table, in document order true if it's a right to left table
+ */
+export async function getRtlTables(file){
+    const zip = new PizzZip(await file.arrayBuffer());
+    const xml = new DOMParser().parseFromString(zip.file("word/document.xml").asText(), "application/xml");
+    const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+
+    // return [...xml.getElementsbyTagNameNS(W, "tbl")].map(table =>{
+    //     const props = table.getElementsbyTagNameNS(W, "tblPr")[0];
+    //     return props?.getElementsbyTagNameNS(W, "bidiVisual").length > 0;
+    // });
+
+     return [...xml.getElementsByTagNameNS(W, "tbl")].map(table => {
+        const props = table.getElementsByTagNameNS(W, "tblPr")[0];
+        return props?.getElementsByTagNameNS(W, "bidiVisual").length > 0;
+    });
+}
