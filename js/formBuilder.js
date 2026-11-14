@@ -69,18 +69,26 @@ export function renderFields(container, fields){
 function createField(field){
     const wrapper = document.getElementById("fieldTemplate").content.cloneNode(true).querySelector(".field");
     const label = wrapper.querySelector("label");
-    const input = wrapper.querySelector("input");
+    let control = wrapper.querySelector("input");
     const id = `field-${nextId++}`;
+
+    if (field.type === "text"){
+        const textarea = document.createElement("textarea");
+        textarea.rows = 1; //starts as one line, grows while typing
+        control.replaceWith(textarea);
+        control = textarea;
+    } else {
+        control.type = field.type;
+    }
 
     wrapper.dataset.name = field.name;
     label.textContent = field.label;
     label.htmlFor = id;
-    input.id = id;
-    input.type = field.type;
-    input.required = field.required;
+    control.id = id;
+    control.required = field.required;
 
     label.dir = "auto";
-    input.dir = "auto";
+    control.dir = "auto";
 
     return wrapper;
 }
@@ -147,7 +155,7 @@ export function collectData(container, fields){
 
             data[field.name] = [...rows].map(row => collectData(row, field.fields));
         } else{
-            const value = element.querySelector("input").value;
+            const value = element.querySelector("input, textarea").value;
             data[field.name] = field.type === "date" ? formatDate(value) : value;
         }
     }

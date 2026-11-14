@@ -16,7 +16,7 @@ const saveBtn = document.querySelector(".saveBtn");
 const previewBtn = document.querySelector(".previewBtn");
 
 // Displaying a hint on how to save the document as a pdf based on the user's device (IOS or android)
-const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.paltform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const isAndroid = /Android/.test(navigator.userAgent);
 
 document.getElementById("pdfHint").textContent =
@@ -137,6 +137,18 @@ const form = document.querySelector(".docForm");
 const previewContainer = document.getElementById("preview");
 const previewDialog = document.getElementById("previewDialog");
 
+//Makes a textarea as tall as it's content
+function autoGrow(textarea){
+    textarea.style.height = "auto"; // shrinks first, so it can also get smaller
+    textarea.style.height = `${textarea.scrollHeight}px`; //then fit the text
+}
+
+//One listener for every textarea in the form, including ones in loop rows added late
+form.addEventListener("input", (e) =>{
+    if (e.target.matches("textarea"))
+        autoGrow(e.target);
+});
+
 // Opens a preview modal for how the document will look with all the fields filled with the data from the form
 document.querySelector(".previewBtn").addEventListener("click", async () =>{
     clearError();
@@ -172,7 +184,7 @@ previewDialog.addEventListener("click", (e) =>{
 
 // Resets the form and returns to the home page
 document.querySelector(".cancelBtn").addEventListener("click", () =>{
-    const hasValues = [...form.querySelectorAll("input")].some(input => input.value !== "");
+    const hasValues = [...form.querySelectorAll("input, textarea")].some(input => input.value !== "");
     
     if(hasValues && !confirm("Discard this report? Everything you have filled will be reset"))
         return;

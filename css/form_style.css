@@ -82,8 +82,13 @@ body > h1 {
     display: contents;
 }
 
+.field:has(textarea) label {
+    align-self: start;
+    padding-top: 7px;
+}
 
-.docForm input {
+.docForm input,
+.docForm textarea {
     width: 100%;
     padding: 6px;
     border: 1px solid #ccc;
@@ -92,9 +97,16 @@ body > h1 {
     font-family: inherit;
 }
 
-.docForm input:focus {
+.docForm input:focus,
+.docForm textarea:focus {
     outline: 2px solid green;
     outline-offset: 1px;
+}
+
+.docForm textarea {
+    resize: none; /*it grows by itself*/
+    overflow: hidden; /*no scrollbar while growing*/
+    line-height: 1.4;
 }
 
 /* on narrow phones, put the label above its input */
@@ -252,7 +264,7 @@ body > h1 {
     color: #c0392b;
 }
 
-#form-error ul {
+#formError ul {
     margin-top: 6px;
     padding-left: 20px;
 }
@@ -261,7 +273,8 @@ body > h1 {
 /* #region Touch screens */
 @media (pointer: coarse) {
     button,
-    .docForm input {
+    .docForm input,
+    .docForm textarea {
         min-height: 44px;
     }
 
