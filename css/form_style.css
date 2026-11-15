@@ -251,6 +251,10 @@ body > h1 {
         break-after: auto;
         min-height: auto !important;
     }
+
+    .docx-wrapper td p {
+        line-height: normal !important;
+    }
 }
 /* #endregion */
 
