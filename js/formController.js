@@ -16,7 +16,7 @@ const saveBtn = document.querySelector(".saveBtn");
 const previewBtn = document.querySelector(".previewBtn");
 
 // Displaying a hint on how to save the document as a pdf based on the user's device (IOS or android)
-const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.paltform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const isAndroid = /Android/.test(navigator.userAgent);
 
 document.getElementById("pdfHint").textContent =
@@ -116,6 +116,42 @@ function getErrorDetails(err){
 }
 
 /**
+ * Fixes the position of floating images
+ * @param {HTMLElement} container - the rendered preview, must be visible so positions can be measured
+ * @returns {void}
+ */
+function fixFloatingImages(container){
+    for(const box of container.querySelectorAll('div[style*="width: 0px"][style*="position: relative"]')){
+        const paragraph = box.closest("p");
+        const page = box.closest("section");
+
+        if(!paragraph || !page)
+            continue;
+
+        const textAreaLeft = page.getBoundingClientRect().left + parseFloat(getComputedStyle(page).paddingLeft);
+        const shift = textAreaLeft - paragraph.getBoundingClientRect().left;
+
+        paragraph.style.position = "relative";
+        box.style.position = "absolute";
+        box.style.direction = "ltr";
+        box.style.left = `calc(${box.style.left || "0px"} + ${shift}px)`;
+    }
+
+    for(const shape of container.querySelectorAll('svg[style*="horizontal-relative:text"], svg[style*="horizontal-relative:margin"]')){
+        const page = shape.closest("section");
+
+        if(page)
+            shape.style.left = getComputedStyle(page).paddingLeft;
+    }
+}
+
+// Preview button functionality
+const form = document.querySelector(".docForm");
+const previewContainer = document.getElementById("preview");
+const previewDialog = document.getElementById("previewDialog");
+
+
+/**
  * Fills the template with the form's values
  * @returns {Promise<void>}
  */
@@ -124,18 +160,33 @@ async function renderPreview(){
     previewContainer.replaceChildren();
     await renderAsync(blob, previewContainer);
 
+    for(const row of previewContainer.querySelectorAll("tr"))
+        row.style.textAlign = "";
+
     const rtlTables = await getRtlTables(blob);
     const tables = previewContainer.querySelectorAll("article table");
     rtlTables.forEach((isRtl, i) =>{
         if(isRtl && tables[i])
             tables[i].dir = "rtl";
     });
+
+    previewDialog.showModal();
+    document.body.style.overflow = "hidden";
+    fixFloatingImages(previewContainer);
 }
 
-// Preview button functionality
-const form = document.querySelector(".docForm");
-const previewContainer = document.getElementById("preview");
-const previewDialog = document.getElementById("previewDialog");
+
+//Makes a textarea as tall as it's content
+function autoGrow(textarea){
+    textarea.style.height = "auto"; // shrinks first, so it can also get smaller
+    textarea.style.height = `${textarea.scrollHeight}px`; //then fit the text
+}
+
+//One listener for every textarea in the form, including ones in loop rows added late
+form.addEventListener("input", (e) =>{
+    if (e.target.matches("textarea"))
+        autoGrow(e.target);
+});
 
 // Opens a preview modal for how the document will look with all the fields filled with the data from the form
 document.querySelector(".previewBtn").addEventListener("click", async () =>{
@@ -160,6 +211,7 @@ document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
 
 // Closing the modal when clicking outside of it
 previewDialog.addEventListener("click", (e) =>{
+    document.body.style.overflow = "";
     const box = previewDialog.getBoundingClientRect();
 
     const clickedOutside = e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
@@ -172,7 +224,7 @@ previewDialog.addEventListener("click", (e) =>{
 
 // Resets the form and returns to the home page
 document.querySelector(".cancelBtn").addEventListener("click", () =>{
-    const hasValues = [...form.querySelectorAll("input")].some(input => input.value !== "");
+    const hasValues = [...form.querySelectorAll("input, textarea")].some(input => input.value !== "");
     
     if(hasValues && !confirm("Discard this report? Everything you have filled will be reset"))
         return;
