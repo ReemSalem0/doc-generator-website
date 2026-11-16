@@ -203,6 +203,16 @@ body > h1 {
     margin: 8px;
     z-index: 1;
 }
+
+@media (max-width: 600px) {
+    #previewDialog {
+        padding: 0;
+    }
+
+    .docx-wrapper {
+        padding: 0 !important;
+    }
+}
 /* #endregion */
 
 /* #region Print (Save as PDF) */

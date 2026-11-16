@@ -145,6 +145,26 @@ function fixFloatingImages(container){
     }
 }
 
+/**
+ * Shrinks the document to fit the preview's on smaller screens
+ * @param {HTMLElement} container - The rendered preview
+ * @returns {void}
+ */
+function fitPreviewToWidth(container){
+    const wrapper = container.querySelector(".docx-wrapper");
+    const page = container.querySelector("section.docx");
+
+    if(!wrapper || !page)
+        return;
+
+    wrapper.style.zoom = "";
+    const available = container.clientWidth;
+    const needed = page.offsetWidth + 2 * parseFloat(getComputedStyle(wrapper).paddingLeft);
+
+    if(needed > available)
+        wrapper.style.zoom = available / needed;
+}
+
 // Preview button functionality
 const form = document.querySelector(".docForm");
 const previewContainer = document.getElementById("preview");
@@ -173,6 +193,7 @@ async function renderPreview(){
     previewDialog.showModal();
     document.body.style.overflow = "hidden";
     fixFloatingImages(previewContainer);
+    fitPreviewToWidth(previewContainer);
 }
 
 
@@ -268,6 +289,12 @@ document.querySelector('[data-format="pdf"]').addEventListener("click", async ()
         console.error(err);
         showError("The PDF could not be created: " + getErrorDetails(err));
     }
+});
+
+// Event listener to resize the preview once the screen size changes (for example if a phone is rotated)
+window.addEventListener("resize", () =>{
+    if(previewDialog.open)
+        fitPreviewToWidth(previewContainer);
 });
 
 // Setup once the page loads
