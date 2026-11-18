@@ -6,28 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="./css/index_style.css">
     <title>Homepage</title>
+    <script>
+        const l = localStorage.getItem("language") ?? "he";
+        document.documentElement.lang = l; 
+        document.documentElement.dir = l === "he" ? "rtl" : "ltr";
+    </script>
 </head>
 
 <body>
     <header class="top-bar">
-        <h1>Logo + Name</h1>
+        <h1>Doc Generator</h1>
+        <button type="button" id="langBtn" data-i18n="common.language"></button>
         <div class="top-actions" hidden>
-            <button type="button" id="editBtn">Edit</button>
-            <button type="button" class="add-template-trigger">New Template</button>
+            <button type="button" id="editBtn" data-i18n="home.edit">Edit</button>
+            <button type="button" class="add-template-trigger" data-i18n="home.newTemplate">New Template</button>
         </div>
     </header>
     <main>
         <!-- New user-->
         <section id="emptyState" hidden>
-            <button type="button" class="big-add-btn add-template-trigger">Add your first template</button>
+            <button type="button" class="big-add-btn add-template-trigger" data-i18n="home.addFirst">Add your first template</button>
         </section>
 
         <!--Returning user (there are templates already saved)-->
         <section id="templatesView" hidden>
             <div class="search">
                 <form id="searchForm">
-                    <input type="search" id="searchInput" placeholder="Search" name="search">
-                    <button type="submit" aria-label="Search">
+                    <input type="search" id="searchInput" data-i18n-placeholder="home.search" placeholder="Search" name="search">
+                    <button type="submit" data-i18n-label="home.search" aria-label="Search">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                             aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                             <path
@@ -37,13 +43,13 @@
                 </form>
             </div>
             <div class="templates-section">
-                <h2>Templates</h2>
+                <h2 data-i18n="home.title">Templates</h2>
                 <div class="edit-toolbar" hidden>
-                    <button type="button" id="selectAllBtn">Select all</button>
-                    <button type="button" id="deleteSelectedBtn">Delete</button>
+                    <button type="button" id="selectAllBtn" data-i18n="home.selectAll">Select all</button>
+                    <button type="button" id="deleteSelectedBtn" data-i18n="home.delete">Delete</button>
                 </div>
                 <ul class="templates-list"></ul>
-                <p class="no-results" hidden>No templates match your search</p>
+                <p class="no-results" hidden data-i18n="home.noResults">No templates match your search</p>
                 <template id="templateItem">
                     <li class="template-card">
                         <input type="checkbox" class="select-template edit-only">
@@ -51,14 +57,14 @@
                             <div class="template-thumbnail" aria-hidden="true" inert></div>
                             <span class="template-name"></span>
                         </a>
-                        <button type="button" class="remove-template-btn normal-only" aria-label="Delete template">
+                        <button type="button" class="remove-template-btn normal-only" data-i18n-label="home.deleteTemplate" aria-label="Delete template">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                                 aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                                 <path
                                     d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z" />
                             </svg>
                         </button>
-                        <button type="button" class="rename-template-btn edit-only" aria-label="Rename template">
+                        <button type="button" class="rename-template-btn edit-only" data-i18n-label="home.renameTemplate" aria-label="Rename template">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                                 aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                                 <path
@@ -76,7 +82,7 @@
                 </template>
 
                 <div class="add-template-btn">
-                    <button type="button" class="add-template-trigger" aria-label="Add template">
+                    <button type="button" class="add-template-trigger" data-i18n-label="home.addTemplate" aria-label="Add template">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                             aria-hidden="true"><!--!Font Awesome Free v7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
                             <path

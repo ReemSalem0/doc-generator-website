@@ -2,6 +2,7 @@ import { saveTemplate, getAllTemplates, saveTemplateOrder, getTemplateOrder, del
 import { filterTemplates, onSearchChange, resetSearch } from "./search.js";
 import { addDisplayNames, promptRename } from "./rename.js";
 import { showThumbnail, forgetThumbnails } from "./thumbnails.js";
+import { t, toggleLanguage, translate } from "./i18n.js";
 
 const emptyState = document.getElementById("emptyState");
 const templatesView = document.getElementById("templatesView");
@@ -24,6 +25,17 @@ let draggedCard = null; //the card being dragged, if any
 let lastPointerY = 0; //where the finger is while dragging
 let autoScrollFrame = null; //the running auto scroll loop
 
+const langBtn = document.getElementById("langBtn");
+langBtn.textContent = t("common.language");
+langBtn.addEventListener("click", toggleLanguage);
+
+//Redraw the parts built by JavaScript when the language changes
+window.addEventListener("languagechange", () => {
+    langBtn.textContent = t("common.language");
+    editBtn.textContent = isEditing ? t("home.done") : t("home.edit");
+    updateToolbar();
+    renderTemplateList(filterTemplates(currentTemplates));
+});
 
 //Every "add template" button opens file picker
 document.querySelectorAll(".add-template-trigger").forEach((button) => {
@@ -36,7 +48,7 @@ fileInput.addEventListener("change", async () => {
     if (!file) return; //user cancelled
 
     if (!file.name.toLowerCase().endsWith(".docx")) {
-        alert("Please choose a Word (.docx) file.");
+        alert(t("home.badFileType"));
         fileInput.value = "";
         return;
     }
@@ -46,7 +58,7 @@ fileInput.addEventListener("change", async () => {
         await showHomepage(); //redraws the page so the new template appears
     } catch (error) {
         console.error(error);
-        alert("Couldn't save the template. Please try again.");
+        alert(t("home.saveFailed"));
     }
 
     fileInput.value = ""; //so picking the same file again triggers "change"
@@ -68,7 +80,7 @@ function setEditMode(on) {
     isEditing = on;
     templatesView.classList.toggle("editing", on);
     editToolbar.hidden = !on;
-    editBtn.textContent = on ? "Done" : "Edit";
+    editBtn.textContent = on ? t("home.done") : t("home.edit");
     selectedIds.clear();
     resetSearch(on);
     noResults.hidden = true;
@@ -95,7 +107,7 @@ templatesList.addEventListener("click", async (event) => {
 
     //Edit mode: rename
     if (event.target.closest(".rename-template-btn")) {
-        const template = currentTemplates.find((t) => t.id === id);
+        const template = currentTemplates.find((tpl) => tpl.id === id);
         if (await promptRename(template)) {
             renderTemplateList(currentTemplates);
         }
@@ -126,8 +138,8 @@ function updateToolbar() {
     const allSelected = count > 0 && count === currentTemplates.length;
 
     deleteSelectedBtn.disabled = count === 0;
-    deleteSelectedBtn.textContent = count > 0 ? `Delete (${count})` : "Delete";
-    selectAllBtn.textContent = allSelected ? "Deselect all" : "Select all";
+    deleteSelectedBtn.textContent = count > 0 ? t("home.deleteCount", { count }) : t("home.delete");
+    selectAllBtn.textContent = allSelected ? t("home.deselectAll") : t("home.selectAll");
 }
 
 //Select all / Deselect all
@@ -148,8 +160,8 @@ deleteSelectedBtn.addEventListener("click", () => deleteWithConfirm([...selected
 
 // shared by the trash can (one id) and "Delete selected" (several ids)
 async function deleteWithConfirm(ids) {
-    const label = ids.length === 1 ? "this template" : `these ${ids.length} templates`;
-    if (!confirm(`Delete ${label}?`)) return;
+    const message = ids.length === 1 ? t("home.confirmDeleteOne") : t("home.confirmDeleteMany", { count: ids.length });
+    if (!confirm(message)) return;
 
     try {
         await deleteTemplates(ids);
@@ -160,7 +172,7 @@ async function deleteWithConfirm(ids) {
         updateToolbar();
     } catch (error) {
         console.error(error);
-        alert("Couldn't delete the template.");
+        alert(t("home.deleteFailed"));
     }
 }
 
@@ -242,7 +254,7 @@ async function onDragEnd() {
         await saveTemplateOrder(newOrderIds);
     } catch (error) {
         console.error(error);
-        alert("Couldn't save the new order");
+        alert(t("home.orderFailed"));
     }
 }
 
@@ -265,6 +277,7 @@ function renderTemplateList(templates) {
 
     for (const template of templates) {
         const card = templateItem.content.cloneNode(true);
+        translate(card);
         const checkbox = card.querySelector(".select-template");
 
         card.querySelector(".template-card").dataset.id = template.id;
@@ -272,7 +285,7 @@ function renderTemplateList(templates) {
         card.querySelector(".template-link").href = `/form.html?id=${template.id}`;
 
         checkbox.checked = selectedIds.has(template.id);
-        checkbox.setAttribute("aria-label", `Select ${template.displayName}`);
+        checkbox.setAttribute("aria-label", t("home.select", { name: template.displayName }));
 
         const thumbnailBox = card.querySelector(".template-thumbnail");
         templatesList.append(card);

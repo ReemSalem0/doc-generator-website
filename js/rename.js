@@ -1,4 +1,5 @@
 import { getTemplateNames, saveTemplateName } from "./db.js";
+import { t } from "./i18n.js";
 
 // The file name without ".docx"
 function defaultName(template) {
@@ -17,12 +18,12 @@ export async function addDisplayNames(templates) {
 // Asks the user for a new name and saves it
 export async function promptRename(template) {
     const currentName = template.displayName ?? defaultName(template);
-    const newName = prompt("Rename template", currentName);
+    const newName = prompt(t("home.renameTemplate"), currentName);
 
     if (newName === null) return null; //user cancelled
     const trimmed = newName.trim();
     if (!trimmed) {
-        alert("The name can't be empty.");
+        alert(t("home.emptyName"));
         return null;
     }
     if (trimmed === currentName) return null; //nothing changed
@@ -33,7 +34,7 @@ export async function promptRename(template) {
         return trimmed;
     } catch (error) {
         console.error(error);
-        alert("Couldn't rename the template.");
+        alert(t("home.renameFailed"));
         return null;
     }
 }

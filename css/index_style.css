@@ -61,7 +61,7 @@ button:hover {
 }
 
 .top-bar h1 {
-    margin-right: auto; /*pushes everything after it to the far right*/
+    margin-inline-end: auto; /*pushes everything after it to the far right*/
 }
 
 .top-actions {
@@ -190,7 +190,7 @@ button:hover {
     display: block;
     width: 22px;
     height: 22px;
-    margin-left: 10px;
+    margin-inline-start: 10px;
     flex-shrink: 0;
 }
 
