@@ -1,8 +1,9 @@
 import { renderAsync } from "docx-preview";
-import {getTemplate} from "./db.js";
+import { getTemplate } from "./db.js";
 import { getTags, createDocx, getRtlTables } from "./docxService.js";
 import { tagsToFields, renderFields, collectData } from "./formBuilder.js";
 import { downloadFile, removeDocxExtention } from "./fileUtils.js";
+import { t, toggleLanguage } from "./i18n.js";
 
 // The current template loaded, gets set once the init() function finishes running
 let currentTemplate = null;
@@ -19,53 +20,64 @@ const previewBtn = document.querySelector(".previewBtn");
 const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const isAndroid = /Android/.test(navigator.userAgent);
 
-document.getElementById("pdfHint").textContent =
-        isIos ? "Then tap the share icon and choose \"Save to Files\"" :
-        isAndroid ? "Then pick \"Save as PDF\" as the printer"
-        : "Then choose \"Save as PDF\" as the destination";
+function setPdfHint() {
+    const key = isIos ? "form.pdfHintIos" : isAndroid ? "form.pdfHintAndroid" : "form.pdfHintDesktop";
+    document.getElementById("pdfHint").textContent = t(key);
+}
+
+const langBtn = document.getElementById("langBtn");
+langBtn.textContent = t("common.language");
+langBtn.addEventListener("click", toggleLanguage);
+
+setPdfHint();
+
+window.addEventListener("languagechange", () => {
+    langBtn.textContent = t("common.language");
+    setPdfHint();
+});
 
 /**
  * Loads the current template from the URL's ?id and reads its tags
  * @returns {Promise<void>}
  */
-async function init(){
-    try{
+async function init() {
+    try {
         const id = Number(new URLSearchParams(window.location.search).get("id"));
 
-    if(!Number.isInteger(id) || id <= 0){
-        showError("No template selected");
-        return;
-    }
+        if (!Number.isInteger(id) || id <= 0) {
+            showError(t("form.noTemplate"));
+            return;
+        }
 
-    const template = await getTemplate(id);
+        const template = await getTemplate(id);
 
-    if(!template){
-        showError(`Template not found`);
-        return;
-    }
+        if (!template) {
+            showError(t("form.notFound"));
+            return;
+        }
 
-    
 
-    const displayName = removeDocxExtention(template.name);
-    docTitle.textContent = displayName;
-    document.title = displayName;
 
-    const fields = tagsToFields(await getTags(template.file)); // Getting the tags then turning them to fields right away
+        const displayName = removeDocxExtention(template.name);
+        docTitle.textContent = displayName;
+        document.title = displayName;
 
-    if(fields.length === 0){
-        showError("This template has no fields to fill in");
-        return;
-    }
+        const fields = tagsToFields(await getTags(template.file)); // Getting the tags then turning them to fields right away
 
-    renderFields(form, fields);
-    currentFields = fields;
-    currentTemplate = template;
-    saveBtn.disabled = false;
-    previewBtn.disabled = false;
-    } catch (err){
+        if (fields.length === 0) {
+            showError(t("form.noFields"));
+            return;
+        }
+
+        renderFields(form, fields);
+        currentFields = fields;
+        currentTemplate = template;
+        saveBtn.disabled = false;
+        previewBtn.disabled = false;
+    } catch (err) {
         console.error(err);
-        showError("This template has a problem and can't be used: " + getErrorDetails(err));
-        
+        showError(t("form.templateProblem") + ": " + getErrorDetails(err));
+
     }
 }
 
@@ -75,16 +87,16 @@ async function init(){
  * @param {string[]} [details] - Optional list of specifics
  * @returns {void}
  */
-function showError(message, details = []){
+function showError(message, details = []) {
     const text = document.createElement("p");
 
-    text.textContent = "ERROR: " + message;
+    text.textContent = t("form.errorPrefix") + " " + message;
     formError.replaceChildren(text);
 
-    if(details.length > 0){
+    if (details.length > 0) {
         const list = document.createElement("ul");
 
-        for(const detail of details){
+        for (const detail of details) {
             const item = document.createElement("li");
             item.textContent = detail;
             list.append(item);
@@ -100,7 +112,7 @@ function showError(message, details = []){
  * Hides the error message
  * @returns {void}
  */
-function clearError(){
+function clearError() {
     formError.hidden = true;
     formError.replaceChildren();
 }
@@ -110,7 +122,7 @@ function clearError(){
  * @param {Error} err - The caught error
  * @returns {string[]} One explanation per error
  */
-function getErrorDetails(err){
+function getErrorDetails(err) {
     const errors = err.properties?.errors ?? [err];
     return errors.map(e => e.properties?.explanation ?? e.message);
 }
@@ -120,12 +132,12 @@ function getErrorDetails(err){
  * @param {HTMLElement} container - the rendered preview, must be visible so positions can be measured
  * @returns {void}
  */
-function fixFloatingImages(container){
-    for(const box of container.querySelectorAll('div[style*="width: 0px"][style*="position: relative"]')){
+function fixFloatingImages(container) {
+    for (const box of container.querySelectorAll('div[style*="width: 0px"][style*="position: relative"]')) {
         const paragraph = box.closest("p");
         const page = box.closest("section");
 
-        if(!paragraph || !page)
+        if (!paragraph || !page)
             continue;
 
         const textAreaLeft = page.getBoundingClientRect().left + parseFloat(getComputedStyle(page).paddingLeft);
@@ -137,10 +149,10 @@ function fixFloatingImages(container){
         box.style.left = `calc(${box.style.left || "0px"} + ${shift}px)`;
     }
 
-    for(const shape of container.querySelectorAll('svg[style*="horizontal-relative:text"], svg[style*="horizontal-relative:margin"]')){
+    for (const shape of container.querySelectorAll('svg[style*="horizontal-relative:text"], svg[style*="horizontal-relative:margin"]')) {
         const page = shape.closest("section");
 
-        if(page)
+        if (page)
             shape.style.left = getComputedStyle(page).paddingLeft;
     }
 }
@@ -150,18 +162,18 @@ function fixFloatingImages(container){
  * @param {HTMLElement} container - The rendered preview
  * @returns {void}
  */
-function fitPreviewToWidth(container){
+function fitPreviewToWidth(container) {
     const wrapper = container.querySelector(".docx-wrapper");
     const page = container.querySelector("section.docx");
 
-    if(!wrapper || !page)
+    if (!wrapper || !page)
         return;
 
     wrapper.style.zoom = "";
     const available = container.clientWidth;
     const needed = page.offsetWidth + 2 * parseFloat(getComputedStyle(wrapper).paddingLeft);
 
-    if(needed > available)
+    if (needed > available)
         wrapper.style.zoom = available / needed;
 }
 
@@ -175,18 +187,18 @@ const previewDialog = document.getElementById("previewDialog");
  * Fills the template with the form's values
  * @returns {Promise<void>}
  */
-async function renderPreview(){
+async function renderPreview() {
     const blob = await createDocx(collectData(form, currentFields), currentTemplate.file);
     previewContainer.replaceChildren();
     await renderAsync(blob, previewContainer);
 
-    for(const row of previewContainer.querySelectorAll("tr"))
+    for (const row of previewContainer.querySelectorAll("tr"))
         row.style.textAlign = "";
 
     const rtlTables = await getRtlTables(blob);
     const tables = previewContainer.querySelectorAll("article table");
-    rtlTables.forEach((isRtl, i) =>{
-        if(isRtl && tables[i])
+    rtlTables.forEach((isRtl, i) => {
+        if (isRtl && tables[i])
             tables[i].dir = "rtl";
     });
 
@@ -198,56 +210,56 @@ async function renderPreview(){
 
 
 //Makes a textarea as tall as it's content
-function autoGrow(textarea){
+function autoGrow(textarea) {
     textarea.style.height = "auto"; // shrinks first, so it can also get smaller
     textarea.style.height = `${textarea.scrollHeight}px`; //then fit the text
 }
 
 //One listener for every textarea in the form, including ones in loop rows added late
-form.addEventListener("input", (e) =>{
+form.addEventListener("input", (e) => {
     if (e.target.matches("textarea"))
         autoGrow(e.target);
 });
 
 // Opens a preview modal for how the document will look with all the fields filled with the data from the form
-document.querySelector(".previewBtn").addEventListener("click", async () =>{
+document.querySelector(".previewBtn").addEventListener("click", async () => {
     clearError();
 
-    if(!form.reportValidity())
+    if (!form.reportValidity())
         return;
 
-    try{
+    try {
         await renderPreview();
         previewDialog.showModal();
-    } catch (err){
+    } catch (err) {
         console.error(err);
         if (err.properties?.errors) console.error(err.properties.errors);
     }
 });
 
 // Event listener to close the preview modal
-document.querySelector(".closePreviewBtn").addEventListener("click" , () =>{
+document.querySelector(".closePreviewBtn").addEventListener("click", () => {
     previewDialog.close();
 });
 
 // Closing the modal when clicking outside of it
-previewDialog.addEventListener("click", (e) =>{
+previewDialog.addEventListener("click", (e) => {
     document.body.style.overflow = "";
     const box = previewDialog.getBoundingClientRect();
 
     const clickedOutside = e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
 
-    if(clickedOutside)
+    if (clickedOutside)
         previewDialog.close();
 })
 
 // Close button functionality
 
 // Resets the form and returns to the home page
-document.querySelector(".cancelBtn").addEventListener("click", () =>{
+document.querySelector(".cancelBtn").addEventListener("click", () => {
     const hasValues = [...form.querySelectorAll("input, textarea")].some(input => input.value !== "");
-    
-    if(hasValues && !confirm("Discard this report? Everything you have filled will be reset"))
+
+    if (hasValues && !confirm(t("form.confirmDiscard")))
         return;
 
     form.reset();
@@ -255,45 +267,45 @@ document.querySelector(".cancelBtn").addEventListener("click", () =>{
 });
 
 // Download as .docx button functionality
-document.querySelector('[data-format="docx"]').addEventListener('click', async () =>{
-    if(!currentTemplate) return;
+document.querySelector('[data-format="docx"]').addEventListener('click', async () => {
+    if (!currentTemplate) return;
 
-    if(!form.reportValidity())
+    if (!form.reportValidity())
         return;
-    
+
     clearError();
 
-    try{
+    try {
         const blob = await createDocx(collectData(form, currentFields), currentTemplate.file);
 
         downloadFile(blob, `${removeDocxExtention(currentTemplate.name)}.docx`);
-    } catch(err){
+    } catch (err) {
         console.error(err);
-        showError("The docx could not be created: " + getErrorDetails(err));
+        showError(t("form.docxFailed") + ": " + getErrorDetails(err));
     }
 });
 
 // Download as .pdf button functionality
-document.querySelector('[data-format="pdf"]').addEventListener("click", async () =>{
-    if(!currentTemplate) return;
+document.querySelector('[data-format="pdf"]').addEventListener("click", async () => {
+    if (!currentTemplate) return;
 
-    if(!form.reportValidity())
+    if (!form.reportValidity())
         return;
 
     clearError();
 
-    try{
+    try {
         await renderPreview();
         window.print();
-    } catch(err){
+    } catch (err) {
         console.error(err);
-        showError("The PDF could not be created: " + getErrorDetails(err));
+        showError(t("form.pdfFailed") + ": " + getErrorDetails(err));
     }
 });
 
 // Event listener to resize the preview once the screen size changes (for example if a phone is rotated)
-window.addEventListener("resize", () =>{
-    if(previewDialog.open)
+window.addEventListener("resize", () => {
+    if (previewDialog.open)
         fitPreviewToWidth(previewContainer);
 });
 

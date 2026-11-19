@@ -1,68 +1,78 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./css/form_style.css" />
-    <title>Form</title>
-  </head>
-  <body>
-    <h1>Logo + Name</h1>
 
-    <div class="wrapper">
-      <div class="formDiv">
-        <h2 id="docTitle">Document Name</h2>
-        <div id="formError" role="alert" hidden></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./css/form_style.css" />
+  <script>
+    const l = localStorage.getItem("language") ?? "he";
+    document.documentElement.lang = l;
+    document.documentElement.dir = l === "he" ? "rtl" : "ltr";
+  </script>
+  <title>Form</title>
+</head>
 
-        <form class="docForm"></form>
+<body>
+  <header class="top-bar">
+    <h1>Doc Generator</h1>
+    <button type="button" id="langBtn" data-i18n="common.language"></button>
+  </header>
+  <div class="wrapper">
+    <div class="formDiv">
+      <h2 id="docTitle">Document Name</h2>
+      <div id="formError" role="alert" hidden></div>
 
-        <template id="fieldTemplate">
-          <div class="field">
-            <label></label>
-            <input />
-          </div>
-        </template>
+      <form class="docForm"></form>
 
-        <template id="loopTemplate">
-          <fieldset class="loop">
-            <legend></legend>
-            <div class="loopRows"></div>
-            <button type="button" class="addRowBtn">Add item</button>
-          </fieldset>
-        </template>
-
-        <template id="loopRowTemplate">
-          <div class="loopRow">
-            <button type="button" class="removeRowBtn">Remove</button>
-          </div>
-        </template>
-
-
-      </div>
-
-      <div class="btnOptions">
-        <div class="dropdownBtn">
-          <button class="saveBtn" disabled>Save</button>
-
-          <div id="saveOptionsDropDown" class="dropdownContent">
-            <button type="button" data-format="docx">Save as .docx</button>
-            <button type="button" data-format="pdf">Save as .pdf
-              <small id="pdfHint"></small>
-            </button>
-          </div>
+      <template id="fieldTemplate">
+        <div class="field">
+          <label></label>
+          <input />
         </div>
+      </template>
 
-        <button type="button" class="cancelBtn">Cancel</button>
-        <button type="button" class="previewBtn" disabled>Preview</button>
-      </div>
+      <template id="loopTemplate">
+        <fieldset class="loop">
+          <legend></legend>
+          <div class="loopRows"></div>
+          <button type="button" class="addRowBtn" data-i18n="form.addItem">Add item</button>
+        </fieldset>
+      </template>
+
+      <template id="loopRowTemplate">
+        <div class="loopRow">
+          <button type="button" class="removeRowBtn" data-i18n="form.removeItem">Remove</button>
+        </div>
+      </template>
+
+
     </div>
 
-     <dialog id="previewDialog">
-      <button type="button" class="closePreviewBtn">&times;</button>
-      <div id="preview"></div>
-     </dialog>
+    <div class="btnOptions">
+      <div class="dropdownBtn">
+        <button class="saveBtn" disabled data-i18n="form.save">Save</button>
 
-    <script  type="module" src="./js/dropdownButtonController.js"></script>
-    <script type="module" src="./js/formController.js"></script>
-  </body>
+        <div id="saveOptionsDropDown" class="dropdownContent">
+          <button type="button" data-format="docx" data-i18n="form.saveDocx">Save as .docx</button>
+          <button type="button" data-format="pdf"><span data-i18n="form.savePdf">Save as .pdf</span>
+            <small id="pdfHint"></small>
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="cancelBtn" data-i18n="form.cancel">Cancel</button>
+      <button type="button" class="previewBtn" disabled data-i18n="form.preview">Preview</button>
+    </div>
+  </div>
+
+  <dialog id="previewDialog">
+    <button type="button" class="closePreviewBtn" data-i18n-label="form.close" aria-label="Close">&times;</button>
+    <div id="preview" dir="ltr"></div>
+  </dialog>
+
+  <script type="module" src="./js/dropdownButtonController.js"></script>
+  <script type="module" src="./js/formController.js"></script>
+</body>
+
 </html>

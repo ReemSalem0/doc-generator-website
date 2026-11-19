@@ -1,4 +1,5 @@
-import { formatDate } from "./fieldUtils";
+import { formatDate } from "./fieldUtils.js";
+import { translate } from "./i18n.js";
 
 // Counter for unique input ids, rows repeat the same fields so ids can't be based on position
 let nextId = 0;
@@ -100,6 +101,7 @@ function createField(field){
  */
 function createLoop(field){
     const fieldset = document.getElementById("loopTemplate").content.cloneNode(true).querySelector(".loop");
+    translate(fieldset);
     const rows = fieldset.querySelector(".loopRows");
 
     fieldset.dataset.name = field.name;
@@ -119,6 +121,7 @@ function createLoop(field){
  */
 function createLoopRow(field){
     const row = document.getElementById("loopRowTemplate").content.cloneNode(true).querySelector(".loopRow");
+    translate(row);
     const removeBtn = row.querySelector(".removeRowBtn");
 
     for(const inner of field.fields){
